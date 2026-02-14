@@ -21,7 +21,7 @@ function Respostas({ postId }) {
           <div className="d-flex align-items-center mb-1">
              <img src={c.fotoUrl || `https://ui-avatars.com/api/?name=${c.nome}`} 
                   className="rounded-circle me-2" style={{ width: '20px', height: '20px', objectFit: 'cover' }} alt="P" />
-             <span className="fw-bold" style={{ color: '#bdfd0d' }}>{c.nome}:</span>
+             <span className="fw-bold" style={{ color: '#0d6efd' }}>{c.nome}:</span>
           </div>
           <span className="ms-4">{c.texto}</span>
         </div>
