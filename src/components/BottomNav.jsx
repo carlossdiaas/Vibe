@@ -8,11 +8,13 @@ export default function BottomNav() {
   const location = useLocation();
   const currentUser = auth.currentUser;
 
+  // Lógica para esconder o botão nas DMs ou Chat
+  const esconderBotao = location.pathname === '/mensagens' || location.pathname.includes('/chat');
+
   useEffect(() => {
     if (!currentUser) return;
 
     try {
-      // Busca mensagens não lidas enviadas PARA o usuário atual
       const q = query(
         collectionGroup(db, "mensagens"),
         where("para", "==", currentUser.uid),
@@ -22,7 +24,6 @@ export default function BottomNav() {
       const unsub = onSnapshot(q, (snap) => {
         setNaoLidas(snap.size);
       }, (error) => {
-        // Se der erro de índice, a barra não some, apenas loga o aviso
         console.warn("Aguardando criação de índice no Firebase...", error.message);
       });
 
@@ -41,13 +42,15 @@ export default function BottomNav() {
         <div style={{ fontSize: '0.65rem', fontWeight: 'bold' }}>Feed</div>
       </Link>
       
-      {/* Botão Central de Postar */}
-      <Link to="/novo-post" className="nav-link text-center">
-         <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow" 
-              style={{ width: '55px', height: '55px', marginBottom: '35px', border: '5px solid white' }}>
-            <i className="bi bi-plus-lg fs-2"></i>
-         </div>
-      </Link>
+      {/* Botão Central de Postar - Renderização Condicional */}
+      {!esconderBotao && (
+        <Link to="/novo-post" className="nav-link text-center">
+           <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow" 
+                style={{ width: '55px', height: '55px', marginBottom: '35px', border: '5px solid white' }}>
+              <i className="bi bi-plus-lg fs-2"></i>
+           </div>
+        </Link>
+      )}
 
       {/* Ícone de DMs com Notificação Vermelha */}
       <Link to="/mensagens" className={`nav-link text-center position-relative ${location.pathname === '/mensagens' ? 'text-primary' : 'text-muted'}`}>

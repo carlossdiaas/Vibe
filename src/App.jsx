@@ -1,5 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react'; // CORRIGIDO: Import único com Hooks
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { auth } from './services/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+
+// Importação das Páginas
 import Cadastro from './pages/Cadastro';
 import Login from './pages/Login';
 import Navbar from './components/Navbar';
@@ -11,30 +15,50 @@ import NovoPost from './pages/NovoPost';
 import Mensagens from './pages/Mensagens';
 import ChatPrivado from './pages/ChatPrivado';
 
-
 function App() {
+  const [loading, setLoading] = useState(true);
+  const [usuarioLogado, setUsuarioLogado] = useState(null);
+
+  useEffect(() => {
+    // Escuta o estado da autenticação para evitar o "Usuário Vibe" no refresh
+    const unsub = onAuthStateChanged(auth, (user) => {
+      setUsuarioLogado(user);
+      setLoading(false); 
+    });
+
+    return () => unsub();
+  }, []);
+
+  // Enquanto o Firebase não responde, mostramos o carregamento
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+        <div className="spinner-border text-primary"></div>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh', paddingBottom: '80px' }}>
-      <Router>
+    <Router>
+      <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
         <Routes>
-          {/* Telas de Entrada */}
+          {/* Telas de Entrada (Sem barras) */}
           <Route path="/" element={<Cadastro />} />
-          <Route path="/perfil/:uid" element={<><Navbar /><PerfilPublico /><BottomNav /></>} />
           <Route path="/login" element={<Login />} />
 
-          {/* Telas Internas com as Barras de Navegação */}
+          {/* Telas Internas (Com barras) */}
           <Route path="/feed" element={<><Navbar /><Feed /><BottomNav /></>} />
+          <Route path="/perfil" element={<><Navbar /><Perfil /><BottomNav /></>} />
+          <Route path="/perfil/:uid" element={<><Navbar /><PerfilPublico /><BottomNav /></>} />
+          <Route path="/novo-post" element={<><Navbar /><NovoPost /><BottomNav /></>} />
           <Route path="/mensagens" element={<><Navbar /><Mensagens /><BottomNav /></>} />
           <Route path="/chat/:chatId/:contatoId" element={<><Navbar /><ChatPrivado /><BottomNav /></>} />
-          <Route path="/perfil" element={<><Navbar /><Perfil /><BottomNav /></>} />
-          <Route path="/novo-post" element={<><Navbar /><NovoPost /><BottomNav /></>} />
           
-          {/* Rotas Auxiliares */}
+          {/* Rota de Pesquisa */}
           <Route path="/pesquisa" element={<><Navbar /><div className="container mt-5 text-center"><h2>Busca de Usuários</h2></div><BottomNav /></>} />
-          <Route path="/mensagens" element={<><Navbar /><div className="container mt-5 text-center"><h2>Suas DMs</h2></div><BottomNav /></>} />
         </Routes>
-      </Router>
-    </div>
+      </div>
+    </Router>
   );
 }
 
